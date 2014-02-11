@@ -24,6 +24,240 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 namespace Malenki;
 
+
+/**
+ * Microdata 
+ * 
+ * This work is greatly taken from the work of [Philip Jägenstedt](http://gitorious.org/microdatajs/microdatajs) and [Lin Clark](http://github.com/linclark/MicrodataPHP).
+ *
+ * @author Michel Petit <petit.michel@gmail.com> 
+ * @license MIT
+ */
 class Microdata
 {
+    protected $dom = null;
+
+
+
+    public function __construct($str_url)
+    {
+        $this->dom = new \DOMDocument();
+        $this->dom->preserveWhiteSpace = false;
+        $this->dom->loadHTMLFile($str_url);
+    }
+
+
+
+    public function extract()
+    {
+        $out = new \stdClass();
+        $out->items = array();
+        $xpath = new \DOMXPath($this->dom);
+        $arrPath = $xpath->query('//*[@itemscope and not(@itemprop)]');
+        
+        foreach($arrPath as $item)
+        {
+            $out->items[] = $this->getItems($item, array());
+        }
+
+        return $out;
+    }
+
+
+
+    public function getItems($item, array $arr_history)
+    {
+        $out = new \stdClass();
+        $out->type = null;
+        $out->id = null;
+        $out->properties = array();
+
+        $strType = trim($item->getAttribute('itemtype'));
+        $strId = trim($item->getAttribute('itemid'));
+
+        if (!empty($strType))
+        {
+            $out->type = explode(' ', $strType);
+        }
+
+
+        if (!empty($strId))
+        {
+            $out->id = $strId;
+        }
+
+
+
+        foreach ($item->properties() as $elem)
+        {
+            if ($elem->hasAttribute('itemscope'))
+            {
+                if (in_array($elem, $arr_history)) {
+                    $value = 'ERROR';
+                }
+                else {
+                    $arr_history[] = $item;
+                    $value = $this->getItems($elem, $arr_history);
+                    array_pop($arr_history);
+                }
+            }
+            else
+            {
+                $value = $elem->textContent;
+
+                $p = $elem->prop();
+
+                if (!count($p))
+                {
+                    $value = null;
+                }
+                if ($elem->hasAttribute('itemscope')) {
+                    $value = $elem;
+                }
+
+                $strTag = strtolower($elem->tagName);
+                if($strTag == 'meta')
+                {
+                    $value = $elem->getAttribute('content');
+                }
+                elseif(in_array($strTag, array('audio', 'embed', 'iframe', 'img', 'source', 'track', 'video')))
+                {
+                    $value = $elem->getAttribute('src');
+                }
+                elseif(in_array($strTag, array('a', 'area', 'link')))
+                {
+                    $value = $elem->getAttribute('href');
+                }
+                elseif($strTag == 'object')
+                {
+                    $value = $elem->getAttribute('data');
+                }
+                elseif($strTag == 'data')
+                {
+                    $value = $elem->getAttribute('value');
+                }
+                elseif($strTag == 'time')
+                {
+                    $value = $elem->getAttribute('datetime');
+                }
+                
+                $value = $elem->itemValue();
+            }
+
+            foreach ($elem->prop() as $prop)
+            {
+                $out->properties[$prop][] = $value;
+            }
+        }
+
+        return $out;
+    }
+    
+
+
+    public function prop()
+    {
+        $strProp = trim($this->getAttribute('itemprop'));
+
+        if(strlen($strProp))
+        {
+            // TODO: use better splitter than this… Use Regex!
+            return explode(' ', $strProp);
+        }
+
+        return array();
+    }
+
+
+
+    public function properties()
+    {
+        $arr_out = array();
+
+        if ($this->hasAttribute('itemscope'))
+        {
+            $xpath = new \DOMXPath($this->ownerDocument);
+            $arr_to_traverse = array($this);
+            $arr_ref = array();
+            
+            $str_ref = trim($this->getAttribute('itemref'));
+
+            if(!empty($str_ref))
+            {
+                // TODO: change explode way…
+                $arr_ref = explode(' ', $str_ref);
+            }
+
+            foreach ($arr_ref as $ref)
+            {
+                $children = $xpath->query('//*[@id="'.$ref.'"]');
+            
+                foreach($children as $child)
+                {
+                    $this->traverse($child, $arr_to_traverse, $arr_out, $this);
+                }
+            }
+
+            while (count($arr_to_traverse))
+            {
+                $this->traverse($arr_to_traverse[0], $arr_to_traverse, $arr_out, $this);
+            }
+        }
+
+        return $arr_out;
+    }
+
+
+
+    protected function traverse($node, &$arr_to_traverse, &$arr_prop, $root)
+    {
+        foreach ($arr_to_traverse as $i => $elem)
+        {
+            if ($elem->isSameNode($node))
+            {
+                unset($arr_to_traverse[$i]);
+            }
+        }
+
+
+        if (!$root->isSameNode($node))
+        {
+            $names = $node->prop();
+
+            if (count($names))
+            {
+                $arr_props[] = $node;
+            }
+
+            if ($this->hasAttribute('itemscope')) {
+                return;
+            }
+        }
+
+        if (isset($node))
+        {
+            // An xpath expression is used to get children instead of childNodes
+            // because childNodes contains DOMText children as well, which breaks on
+            // the call to getAttributes() in itemProp().
+            $xpath = new \DOMXPath($this->ownerDocument);
+            $children = $xpath->query($node->getNodePath() . '/*');
+
+            foreach ($children as $child)
+            {
+                $this->traverse($child, $arr_to_traverse, $arr_props, $root);
+            }
+        }
+    }
+
+
+    public function __toString()
+    {
+        return json_encode($this->extract());
+    }
 }
+
+
+$url = 'http://fr2.php.net/manual/en/class.domnode.php#domnode.props.ownerdocument';
+$md = new Microdata($url);
+$data = $md->extract();
+var_dump($data);
