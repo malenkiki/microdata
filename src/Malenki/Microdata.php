@@ -38,6 +38,10 @@ class Microdata extends \DOMElement
     protected $dom = null;
 
 
+    protected static function split($str)
+    {
+        return preg_split('/[\s]+/', $str);
+    }
 
     public function __construct($str_url)
     {
@@ -78,7 +82,7 @@ class Microdata extends \DOMElement
 
         if (!empty($strType))
         {
-            $out->type = explode(' ', $strType);
+            $out->type = self::split($strType);
         }
 
 
@@ -161,8 +165,7 @@ class Microdata extends \DOMElement
 
         if(strlen($strProp))
         {
-            // TODO: use better splitter than this… Use Regex!
-            return explode(' ', $strProp);
+            return self::split($strProp);
         }
 
         return array();
@@ -184,8 +187,7 @@ class Microdata extends \DOMElement
 
             if(!empty($str_ref))
             {
-                // TODO: change explode way…
-                $arr_ref = explode(' ', $str_ref);
+                $arr_ref = self::split($str_ref);
             }
 
             foreach ($arr_ref as $ref)
