@@ -33,7 +33,7 @@ namespace Malenki;
  * @author Michel Petit <petit.michel@gmail.com> 
  * @license MIT
  */
-class Microdata
+class Microdata extends \DOMElement
 {
     protected $dom = null;
 
@@ -42,8 +42,9 @@ class Microdata
     public function __construct($str_url)
     {
         $this->dom = new \DOMDocument();
+        $this->dom->registerNodeClass('DOMElement', '\Malenki\Microdata');
         $this->dom->preserveWhiteSpace = false;
-        $this->dom->loadHTMLFile($str_url);
+        @$this->dom->loadHTMLFile($str_url);
     }
 
 
