@@ -255,9 +255,3 @@ class Microdata
         return json_encode($this->extract());
     }
 }
-
-
-$url = 'http://fr2.php.net/manual/en/class.domnode.php#domnode.props.ownerdocument';
-$md = new Microdata($url);
-$data = $md->extract();
-var_dump($data);
