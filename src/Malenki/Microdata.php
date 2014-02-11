@@ -38,9 +38,23 @@ class Microdata extends \DOMElement
     protected $dom = null;
 
 
-    protected static function split($str)
+    protected static function split($str, $as_array = false)
     {
-        return preg_split('/[\s]+/', $str);
+        $arr = preg_split('/[\s]+/', $str);
+
+        if($as_array)
+        {
+            return $arr;
+        }
+
+        if(count($arr) == 1)
+        {
+            return $arr[0];
+        }
+        else
+        {
+            return $arr;
+        }
     }
 
     public function __construct($str_url)
@@ -58,9 +72,10 @@ class Microdata extends \DOMElement
         $out = new \stdClass();
         $out->items = array();
         $xpath = new \DOMXPath($this->dom);
-        $arrPath = $xpath->query('//*[@itemscope and not(@itemprop)]');
-        
-        foreach($arrPath as $item)
+        $colPath = $xpath->query('//*[@itemscope and not(@itemprop)]');
+        $out->count = $colPath->length;
+        $out->hasItems = (boolean) $colPath->length;
+        foreach($colPath as $item)
         {
             $out->items[] = $this->getItems($item, array());
         }
@@ -73,8 +88,6 @@ class Microdata extends \DOMElement
     public function getItems($item, array $arr_history)
     {
         $out = new \stdClass();
-        $out->type = null;
-        $out->id = null;
         $out->properties = array();
 
         $strType = trim($item->getAttribute('itemtype'));
@@ -91,7 +104,7 @@ class Microdata extends \DOMElement
             $out->id = $strId;
         }
 
-
+        $out->hasId = isset($out->id);
 
         foreach ($item->properties() as $elem)
         {
@@ -116,11 +129,14 @@ class Microdata extends \DOMElement
                 {
                     $value = null;
                 }
-                if ($elem->hasAttribute('itemscope')) {
+                
+                if ($elem->hasAttribute('itemscope'))
+                {
                     $value = $elem;
                 }
 
                 $strTag = strtolower($elem->tagName);
+                
                 if($strTag == 'meta')
                 {
                     $value = $elem->getAttribute('content');
@@ -150,9 +166,10 @@ class Microdata extends \DOMElement
 
             foreach ($elem->prop() as $prop)
             {
-                $out->properties[$prop][] = $value;
+                $out->properties[$prop] = $value;
             }
         }
+
 
         return $out;
     }
@@ -165,7 +182,7 @@ class Microdata extends \DOMElement
 
         if(strlen($strProp))
         {
-            return self::split($strProp);
+            return self::split($strProp, true);
         }
 
         return array();
