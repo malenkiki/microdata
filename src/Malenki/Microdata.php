@@ -142,7 +142,6 @@ class Microdata extends \DOMElement
                     $value = $elem->getAttribute('datetime');
                 }
                 
-                $value = $elem->itemValue();
             }
 
             foreach ($elem->prop() as $prop)
@@ -227,26 +226,21 @@ class Microdata extends \DOMElement
 
             if (count($names))
             {
-                $arr_props[] = $node;
+                $arr_prop[] = $node;
             }
 
-            if ($this->hasAttribute('itemscope')) {
+            if ($node->hasAttribute('itemscope'))
+            {
                 return;
             }
         }
 
-        if (isset($node))
-        {
-            // An xpath expression is used to get children instead of childNodes
-            // because childNodes contains DOMText children as well, which breaks on
-            // the call to getAttributes() in itemProp().
-            $xpath = new \DOMXPath($this->ownerDocument);
-            $children = $xpath->query($node->getNodePath() . '/*');
+        $xpath = new \DOMXPath($this->ownerDocument);
+        $children = $xpath->query($node->getNodePath() . '/*');
 
-            foreach ($children as $child)
-            {
-                $this->traverse($child, $arr_to_traverse, $arr_props, $root);
-            }
+        foreach ($children as $child)
+        {
+            $this->traverse($child, $arr_to_traverse, $arr_prop, $root);
         }
     }
 
