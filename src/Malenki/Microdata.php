@@ -35,6 +35,9 @@ namespace Malenki;
  */
 class Microdata extends \DOMElement
 {
+    const AS_URL = 1;
+    const AS_STRING = 2;
+
     protected $dom = null;
 
 
@@ -57,12 +60,30 @@ class Microdata extends \DOMElement
         }
     }
 
-    public function __construct($str_url)
+    public function __construct($str, $type = self::AS_URL)
     {
         $this->dom = new \DOMDocument();
         $this->dom->registerNodeClass('DOMElement', '\Malenki\Microdata');
         $this->dom->preserveWhiteSpace = false;
-        @$this->dom->loadHTMLFile($str_url);
+
+        if(!is_string($str))
+        {
+            throw new \InvalidArgumentException('URL or content must be a valid string!');
+        }
+
+        if(!in_array($type, array(self::AS_URL, self::AS_STRING)))
+        {
+            throw new \InvalidArgumentException('Bad type value!');
+        }
+
+        if($type == self::AS_URL)
+        {
+            @$this->dom->loadHTMLFile($str);
+        }
+        else
+        {
+            @$this->dom->loadHTML($str);
+        }
     }
 
 
