@@ -56,6 +56,15 @@ class Microdata extends \DOMElement
     protected $dom = null;
 
 
+    /**
+     * Helper to split content into array or string if one element is returned.
+     * 
+     * @param string $str The string to split
+     * @param boolean $as_array If true, always returns array.
+     * @static
+     * @access protected
+     * @return mixed An array if get more than one elements else it is a string
+     */
     protected static function split($str, $as_array = false)
     {
         $arr = preg_split('/[\s]+/', $str);
@@ -75,6 +84,16 @@ class Microdata extends \DOMElement
         }
     }
 
+
+
+    /**
+     * Instanciate loading document as it is or getting it from URL. 
+     * 
+     * @param string $str Document's URL or document's content.
+     * @param integer $type One of the class constant to set the way of getting the document
+     * @access public
+     * @return void
+     */
     public function __construct($str, $type = self::AS_URL)
     {
         $this->dom = new \DOMDocument();
@@ -103,6 +122,12 @@ class Microdata extends \DOMElement
 
 
 
+    /**
+     * Extracts microdata's tree
+     * 
+     * @access public
+     * @return \stdClass
+     */
     public function extract()
     {
         $out = new \stdClass();
@@ -300,6 +325,12 @@ class Microdata extends \DOMElement
     }
 
 
+    /**
+     * In string context, returns JSON microdata tree. 
+     * 
+     * @access public
+     * @return string
+     */
     public function __toString()
     {
         return json_encode($this->extract());
