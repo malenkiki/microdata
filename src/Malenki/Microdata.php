@@ -26,7 +26,22 @@ namespace Malenki;
 
 
 /**
- * Microdata 
+ * Parse HTML to get microdata elements.
+ *
+ * Can use either URL or document content:
+ *
+ *     $md = new Microdata($url); // Load content from URL 
+ *     $md = new Microdata($url, Microdata::AS_URL); // Same as previous 
+ *     $md = new Microdata($content, Microdata::AS_STRING); // Load from content
+ *
+ * You get microdata tree by calling `extract()` method:
+ *
+ *     $md = new Microdata($url);
+ *     var_dump($md->extract());
+ *
+ * You can get microdata tree as JSON very quicky by using object into string context:
+ *     $md = new Microdata($url);
+ *     echo $md; // JSON
  * 
  * This work is greatly taken from the work of [Philip Jägenstedt](http://gitorious.org/microdatajs/microdatajs) and [Lin Clark](http://github.com/linclark/MicrodataPHP).
  *
