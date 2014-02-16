@@ -98,6 +98,9 @@ class Microdata extends \DOMElement
     /**
      * Instanciate loading document as it is or getting it from URL. 
      * 
+     * @throw \RuntimeException If DOM extension is not loaded.
+     * @throw \InvalidArgumentException If URL or content is not a valid string.
+     * @throw \InvalidArgumentException If given type does not exist.
      * @param string $str Document's URL or document's content.
      * @param integer $type One of the class constant to set the way of getting the document
      * @access public
@@ -105,6 +108,11 @@ class Microdata extends \DOMElement
      */
     public function __construct($str, $type = self::AS_URL)
     {
+        if(!extension_loaded('dom'))
+        {
+            throw new \RuntimeException(__CLASS__.' cannot be used without DOM extension!');
+        }
+
         $this->dom = new \DOMDocument();
         $this->dom->registerNodeClass('DOMElement', '\Malenki\Microdata');
         $this->dom->preserveWhiteSpace = false;
