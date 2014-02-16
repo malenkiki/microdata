@@ -62,6 +62,9 @@ class Microdata extends \DOMElement
 
     protected $dom = null;
     protected $extracted_content = false;
+    protected $must_check = false;
+    protected $str_schema = null;
+    protected $schema = null;
     protected $arr_stats = array();
 
 
@@ -93,6 +96,16 @@ class Microdata extends \DOMElement
         }
     }
 
+
+    public function getSchema($str = null)
+    {
+        if($str)
+        {
+            return json_decode(file_get_contents($str));
+        }
+
+        return json_decode(file_get_contents('http://schema.rdfs.org/all.json'));
+    }
 
 
     /**
@@ -138,6 +151,21 @@ class Microdata extends \DOMElement
     }
 
 
+    public function availableChecking($str_uri = null)
+    {
+        $this->must_check = true;
+
+        if($str_uri)
+        {
+            $this->str_schema = $str_uri;
+        }
+        else
+        {
+            $this->str_schema = 'http://schema.rdfs.org/all.json';
+        }
+
+        return $this;
+    }
 
     /**
      * Extracts microdata's tree
@@ -149,6 +177,8 @@ class Microdata extends \DOMElement
     {
         if(!$this->extracted_content)
         {
+            $this->check();
+
             $out = new \stdClass();
             $out->items = array();
             $xpath = new \DOMXPath($this->dom);
@@ -181,6 +211,10 @@ class Microdata extends \DOMElement
     {
         $out = new \stdClass();
         $out->properties = array();
+        $out->hasError = false;
+        $out->errors = array();
+
+        $arrProvCheck = array();
 
         $strType = trim($item->getAttribute('itemtype'));
         $strId = trim($item->getAttribute('itemid'));
@@ -199,8 +233,10 @@ class Microdata extends \DOMElement
                 $arr_loop = $out->type;
             }
 
+            // statistical data + check
             foreach($arr_loop as $t)
             {
+                // stats
                 if(!array_key_exists($t, $this->arr_stats))
                 {
                     $this->arr_stats[$t] = 1;
@@ -208,6 +244,22 @@ class Microdata extends \DOMElement
                 else
                 {
                     $this->arr_stats[$t] += 1;
+                }
+
+                // check
+                if($this->schema)
+                {
+                    $type = array_pop(explode('/', $t));
+
+                    if(!isset($this->schema->types->$type))
+                    {
+                        $out->hasError = true;
+                        $out->errors[] = $type .' does not exist!';;
+                    }
+                    else
+                    {
+                        $arrProvCheck[$type] = array();
+                    }
                 }
             }
         }
@@ -227,7 +279,8 @@ class Microdata extends \DOMElement
                 if (in_array($elem, $arr_history)) {
                     $value = 'ERROR'; //TODO handles that using other way!
                 }
-                else {
+                else
+                {
                     $arr_history[] = $item;
                     $value = $this->getItems($elem, $arr_history);
                     array_pop($arr_history);
@@ -280,6 +333,22 @@ class Microdata extends \DOMElement
 
             foreach ($elem->prop() as $prop)
             {
+                if($this->schema)
+                {
+                    foreach($arrProvCheck as $typeItem => $foo)
+                    {
+                        
+                        if(
+                            !in_array($value, $this->schema->types->$typeItem->properties)
+                            ||
+                            !in_array($value, $this->schema->types->$typeItem->specific_properties)
+                        )
+                        {
+                            $arrProvCheck[$typeItem][] = $prop . ' is not official property!';
+                        }
+                    }
+                }
+                
                 $out->properties[$prop] = $value;
             }
         }
@@ -449,6 +518,17 @@ class Microdata extends \DOMElement
             $this->traverse($child, $arr_to_traverse, $arr_prop, $root);
         }
     }
+
+
+
+    protected function check()
+    {
+        if($this->must_check)
+        {
+            $this->schema = self::getSchema($this->str_schema);
+        }
+    }
+
 
 
     /**
