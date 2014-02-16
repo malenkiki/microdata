@@ -137,7 +137,7 @@ class Microdata extends \DOMElement
             $out = new \stdClass();
             $out->items = array();
             $xpath = new \DOMXPath($this->dom);
-            $colPath = $xpath->query('//*[@itemscope and not(@itemprop)]');
+            $colPath = $xpath->query('//*[@itemscope and not(ancestor::*[@itemscope])]');
             $out->count = $colPath->length;
             $out->hasItems = (boolean) $colPath->length;
 
@@ -210,7 +210,7 @@ class Microdata extends \DOMElement
             if ($elem->hasAttribute('itemscope'))
             {
                 if (in_array($elem, $arr_history)) {
-                    $value = 'ERROR';
+                    $value = 'ERROR'; //TODO handles that using other way!
                 }
                 else {
                     $arr_history[] = $item;
