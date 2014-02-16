@@ -237,6 +237,50 @@ class Microdata extends \DOMElement
     
 
 
+    /**
+     * hasType 
+     *
+     * @todo implement it!
+     * 
+     * @param string $str Type short name or full URL
+     * @access public
+     * @return boolean
+     */
+    public function hasType($str)
+    {
+    }
+
+
+    /**
+     * getType 
+     *
+     * @todo implement it!
+     * 
+     * @param string $str Type short name or full URL
+     * @access public
+     * @return mixed
+     */
+    public function getType($str)
+    {
+    }
+
+
+    public function getTypeCount($str)
+    {
+    }
+
+
+    /**
+     * getAllTypeCount 
+     * 
+     * @access public
+     * @return array
+     */
+    public function getAllTypeCount()
+    {
+    }
+
+
     public function prop()
     {
         $strProp = trim($this->getAttribute('itemprop'));
