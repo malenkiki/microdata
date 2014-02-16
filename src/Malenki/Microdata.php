@@ -54,6 +54,8 @@ class Microdata extends \DOMElement
     const AS_STRING = 2;
 
     protected $dom = null;
+    protected $extracted_content = false;
+    protected $arr_stats = array();
 
 
     /**
@@ -130,19 +132,33 @@ class Microdata extends \DOMElement
      */
     public function extract()
     {
-        $out = new \stdClass();
-        $out->items = array();
-        $xpath = new \DOMXPath($this->dom);
-        $colPath = $xpath->query('//*[@itemscope and not(@itemprop)]');
-        $out->count = $colPath->length;
-        $out->hasItems = (boolean) $colPath->length;
-        foreach($colPath as $item)
+        if(!$this->extracted_content)
         {
-            $out->items[] = $this->getItems($item, array());
+            $out = new \stdClass();
+            $out->items = array();
+            $xpath = new \DOMXPath($this->dom);
+            $colPath = $xpath->query('//*[@itemscope and not(@itemprop)]');
+            $out->count = $colPath->length;
+            $out->hasItems = (boolean) $colPath->length;
+
+            foreach($colPath as $item)
+            {
+                $out->items[] = $this->getItems($item, array());
+            }
+
+            $this->extracted_content = $out;
         }
 
-        return $out;
+        return $this->extracted_content;
     }
+
+
+
+    public function isExtracted()
+    {
+        return is_object($this->extracted_content);
+    }
+
 
 
 
@@ -154,9 +170,32 @@ class Microdata extends \DOMElement
         $strType = trim($item->getAttribute('itemtype'));
         $strId = trim($item->getAttribute('itemid'));
 
+        var_dump($strType);
         if (!empty($strType))
         {
             $out->type = self::split($strType);
+
+            // statistical data about types
+            if(!is_array($out->type))
+            {
+                $arr_loop = array($out->type);
+            }
+            else
+            {
+                $arr_loop = $out->type;
+            }
+
+            foreach($arr_loop as $t)
+            {
+                if(!array_key_exists($t, $this->arr_stats))
+                {
+                    $this->arr_stats[$t] = 1;
+                }
+                else
+                {
+                    $this->arr_stats[$t] += 1;
+                }
+            }
         }
 
 
@@ -265,20 +304,49 @@ class Microdata extends \DOMElement
     }
 
 
+    /**
+     * Gets amount of given type.
+     *
+     * If type was not found, returns 0. 
+     * 
+     * @param string $str Type full name
+     * @access public
+     * @return integer
+     */
     public function getTypeCount($str)
     {
+        if(!array_key_exists($str, $this->arr_stats))
+        {
+            return 0;
+        }
+
+        if(!$this->isExtracted())
+        {
+            $this->extract();
+        }
+
+        return $this->arr_stats[$str];
     }
 
 
     /**
-     * getAllTypeCount 
+     * Get amount of all types found into the document. 
      * 
+     * Returns values as an array. Keys are type's names, values are amounts.
+     *
      * @access public
      * @return array
      */
     public function getAllTypeCount()
     {
+        if(!$this->isExtracted())
+        {
+            $this->extract();
+        }
+
+        return $this->arr_stats;
     }
+
 
 
     public function prop()
