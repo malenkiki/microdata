@@ -170,7 +170,6 @@ class Microdata extends \DOMElement
         $strType = trim($item->getAttribute('itemtype'));
         $strId = trim($item->getAttribute('itemid'));
 
-        var_dump($strType);
         if (!empty($strType))
         {
             $out->type = self::split($strType);
