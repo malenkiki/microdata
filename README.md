@@ -23,4 +23,12 @@ $md = new Microdata('http://www.some-url.com/path/page.html');
 print($md);
 ```
 
+You can get statistical data about amount of types found:
+
+```php
+use \Malenki\Microdata;
+$md = new Microdata('http://www.some-url.com/path/page.html');
+var_dump($md->getAllTypeCount());
+```
+
 Next enhencement will include **microdata checking**! Stay in touch!

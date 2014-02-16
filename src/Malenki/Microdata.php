@@ -40,9 +40,16 @@ namespace Malenki;
  *     var_dump($md->extract());
  *
  * You can get microdata tree as JSON very quicky by using object into string context:
+ *
  *     $md = new Microdata($url);
  *     echo $md; // JSON
  * 
+ * You can get statistical data about amount of types found:
+ *
+ *     $md = new Microdata($url);
+ *     var_dump($md->getAllTypeCount());
+ *
+ *
  * This work is greatly taken from the work of [Philip Jägenstedt](http://gitorious.org/microdatajs/microdatajs) and [Lin Clark](http://github.com/linclark/MicrodataPHP).
  *
  * @author Michel Petit <petit.michel@gmail.com> 
