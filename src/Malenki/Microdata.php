@@ -97,7 +97,19 @@ class Microdata extends \DOMElement
     }
 
 
-    public function getSchema($str = null)
+    /**
+     * Gets reference schema. 
+     * 
+     * This allows to get schema definition to test microdata with it.
+     *
+     * If no arg is given, then it will get content form <http://schema.rdfs.org/all.json>.
+     * If you give a file as arg, it must have the same structure as JSON found into previous link. 
+     * @param string $str If given, a local JSON file.
+     * @static
+     * @access public
+     * @return object
+     */
+    public static function getSchema($str = null)
     {
         if($str)
         {
@@ -106,6 +118,7 @@ class Microdata extends \DOMElement
 
         return json_decode(file_get_contents('http://schema.rdfs.org/all.json'));
     }
+
 
 
     /**
@@ -151,6 +164,14 @@ class Microdata extends \DOMElement
     }
 
 
+
+    /**
+     * Enables checking feature. 
+     * 
+     * @param string $str_uri URI to fetch 
+     * @access public
+     * @return \Microdata
+     */
     public function availableChecking($str_uri = null)
     {
         $this->must_check = true;
@@ -166,6 +187,8 @@ class Microdata extends \DOMElement
 
         return $this;
     }
+
+
 
     /**
      * Extracts microdata's tree
@@ -199,6 +222,12 @@ class Microdata extends \DOMElement
 
 
 
+    /**
+     * Tests whether current selected page has its microdata content extracted. 
+     * 
+     * @access public
+     * @return boolean
+     */
     public function isExtracted()
     {
         return is_object($this->extracted_content);
@@ -355,8 +384,24 @@ class Microdata extends \DOMElement
                         }
                     }
                 }
-                
-                $out->properties[$prop] = $value;
+
+                // already set? So, it is multiple prop!
+                if(isset($out->properties[$prop]))
+                {
+                    if(!is_array($out->properties[$prop]))
+                    {
+                        $out->properties[$prop] = array($out->properties[$prop], $value);
+                    }
+                    else
+                    {
+                        $out->properties[$prop][] = $value;
+                    }
+                }
+                else
+                {
+                    $out->properties[$prop] = $value;
+                }
+
             }
         }
 
