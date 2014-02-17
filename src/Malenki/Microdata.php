@@ -254,11 +254,11 @@ class Microdata extends \DOMElement
                     if(!isset($this->schema->types->$type))
                     {
                         $out->hasError = true;
-                        $out->errors[] = $type .' does not exist!';;
+                        $out->errors[] = $type .' schema does not exist!';;
                     }
                     else
                     {
-                        $arrProvCheck[$type] = array();
+                        $arrProvCheck[] = $type;
                     }
                 }
             }
@@ -335,16 +335,23 @@ class Microdata extends \DOMElement
             {
                 if($this->schema)
                 {
-                    foreach($arrProvCheck as $typeItem => $foo)
+                    foreach($arrProvCheck as $typeItem)
                     {
                         
                         if(
-                            !in_array($value, $this->schema->types->$typeItem->properties)
-                            ||
-                            !in_array($value, $this->schema->types->$typeItem->specific_properties)
+                            !in_array($prop, $this->schema->types->$typeItem->properties)
+                            &&
+                            !in_array($prop, $this->schema->types->$typeItem->specific_properties)
                         )
                         {
-                            $arrProvCheck[$typeItem][] = $prop . ' is not official property!';
+                            $strError = $prop . ' is not official property of ' . $typeItem . '!';
+
+                            if(!in_array($strError, $out->errors))
+                            {
+                                $out->errors[] = $strError;
+                            }
+
+                            $out->hasError = true;
                         }
                     }
                 }
