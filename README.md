@@ -36,8 +36,8 @@ Now, you can **check microdata** with schemas defined on <www.schema.org> using 
 ```php
 use \Malenki\Microdata;
 $md = new Microdata('http://www.some-url.com/path/page.html');
-$md->availableChecking(); // no arg: takes JSON from official website
+$md->availableChecking(); // no arg: it takes JSON from official website
 //or
-$md->availableChecking('all.json'); // arg: takes JSON from file system
-var_dump($md->extract()); // If errors found, they will be present into the returned JSON
+$md->availableChecking('all.json'); // arg: it takes JSON from file system
+print($md); // If errors found, they will be present into the returned JSON
 ```
