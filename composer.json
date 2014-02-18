@@ -1,8 +1,11 @@
 {
     "name": "malenki/microdata",
     "type": "library",
+    "keywords": ["microdata", "web", "semantic", "html", "json", "dom"],
     "require": {
-        "php": ">=5.3.0"
+        "php": ">=5.3.0",
+        "ext-dom": "*",
+        "malenki/argile": "dev-master"
     },
     "license": "MIT",
     "authors": [
@@ -12,6 +15,7 @@
             "role": "Developer"
         }
     ],
+    "bin": ["bin/microdata"],    
     "autoload": {
         "psr-0": {
             "Malenki": "src/"

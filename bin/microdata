@@ -1,0 +1,134 @@
+#!/usr/bin/env php
+<?php
+/*
+Copyright (c) 2014 Michel Petit <petit.michel@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
+
+namespace Malenki;
+
+(@include_once __DIR__ . '/../vendor/autoload.php') || @include_once __DIR__ . '/../../../autoload.php';
+
+if(phpversion() >= '5.5.0')
+{
+    cli_set_process_title('microdata');
+}
+
+$opt = \Malenki\Argile\Options::getInstance();
+$opt->addUsage("URI");
+$opt->addUsage("--check URI");
+$opt->addUsage("--json URI");
+$opt->description('Parse URI destination page to get its microdata');
+$opt->version(
+    'Microdata CLI version 1.0'.
+    "\n".
+    "\n".
+    "\n".
+'Copyright (c) 2014 Michel Petit <petit.michel@gmail.com>'.
+"\n".
+    "\n".
+'Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:'.
+"\n".
+    "\n".
+'The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.'.
+"\n".
+    "\n".
+'THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'
+);
+
+$opt->flexible();
+
+$opt->newSwitch('check')
+    ->short('c')
+    ->long('check')
+    ->help('Include some test results with schema defined on schema.org.')
+    ;
+$opt->newSwitch('checkfile')
+    ->long('check-file')
+    ->help('If "check" option is called, you can use alternate JSON for checking process instead of use JSON of schema.org. This FILE must have the same tree as the original one.', 'FILE')
+    ;
+
+$opt->newSwitch('pipe')
+    ->short('p')
+    ->long('pipe')
+    ->help('Read document to parse from pipe or standard input.')
+    ;
+
+$opt->newSwitch('json')
+    ->short('j')
+    ->long('json')
+    ->help('Output result as JSON')
+    ;
+
+$opt->parse(false);
+
+if(!$opt->hasArgument())
+{
+    fwrite(STDERR, 'You must give URL to parse!');
+    fwrite(STDERR, PHP_EOL);
+    exit(1);
+}
+
+
+if($opt->has('pipe'))
+{
+    $handle = fopen('php://stdin', 'rb');
+    $str_contents = stream_get_contents($handle);
+    fclose($handle);
+    
+    $md = new Microdata($str_contents, Microdata::AS_STRING);
+}
+else
+{
+    $md = new Microdata(array_pop($opt->getArguments()));
+}
+
+
+if($opt->has('check'))
+{
+    if($opt->has('checkfile'))
+    {
+        if(!is_readable($opt->get('checkfile')))
+        {
+            fwrite(STDERR, 'Given JSON schema is not readable!');
+            fwrite(STDERR, "\n");
+            exit(1);
+        }
+        $md->availableChecking($opt->get('checkfile'));
+    }
+    else
+    {
+        $md->availableChecking();
+    }
+}
+
+if($opt->has('json'))
+{
+    echo $md;
+}
+else
+{
+    //TODO formating result
+    var_dump($md->extract());
+}
+
+exit(0);
