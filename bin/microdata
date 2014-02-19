@@ -62,7 +62,8 @@ $opt->newSwitch('check')
     ->long('check')
     ->help('Include some test results with schema defined on schema.org.')
     ;
-$opt->newSwitch('checkfile')
+$opt->newValue('checkfile')
+    ->required()
     ->long('check-file')
     ->help('If "check" option is called, you can use alternate JSON for checking process instead of use JSON of schema.org. This FILE must have the same tree as the original one.', 'FILE')
     ;
