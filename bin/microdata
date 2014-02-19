@@ -81,9 +81,9 @@ $opt->newSwitch('json')
 
 $opt->parse(false);
 
-if(!$opt->hasArgument())
+if(!$opt->hasArgument() && !$opt->has('pipe'))
 {
-    fwrite(STDERR, 'You must give URL to parse!');
+    fwrite(STDERR, 'You must give at least URL to parse or input data!');
     fwrite(STDERR, PHP_EOL);
     exit(1);
 }
