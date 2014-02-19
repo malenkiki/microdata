@@ -4,7 +4,7 @@ Get microdata from web page !
 
 ## Install
 
-You can install this lib using (Composer)[https://getcomposer.org/] or by cloning this repository.
+You can install this lib using [Composer](https://getcomposer.org/) or by cloning this repository.
 
 By using **Composer**, just add following lines into your `composer.json` file and run `composer update`:
 ```json
@@ -17,7 +17,7 @@ By using **Composer**, just add following lines into your `composer.json` file a
 
 By cloning this repository, just do `git clone https://github.com/malenkiki/microdata.git`.
 
-## Conding using the librairy
+## Coding using the library
 
 With this library, you get microdata as **tree object**.
 
@@ -60,7 +60,7 @@ print($md); // If errors found, they will be present into the returned JSON
 
 ## Using CLI app
 
-This librairy comes with a small CLI application too.
+This library comes with a small CLI application too.
 
 Its use is simple. If you have not idea how to used it, just do `bin/microdata --help` or read following lines.
 
