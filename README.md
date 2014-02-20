@@ -94,3 +94,11 @@ You can even use pipe or standard input too:
 $ echo '<p itemscope itemtype="http://schema.org/Product"><span itemprop="name">Truc</span></p>' | bin/microdata --pipe
 
 ```
+
+## Requirements
+
+You must have PHP 5.3+ and DOM extension loaded.
+
+## Thanks
+
+This lib is based on work of [Philip Jägenstedt](http://gitorious.org/microdatajs/microdatajs) and [Lin Clark](http://github.com/linclark/MicrodataPHP). 
