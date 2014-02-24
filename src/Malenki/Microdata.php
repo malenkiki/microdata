@@ -61,6 +61,7 @@ class Microdata extends \DOMElement
     const AS_STRING = 2;
 
     protected $dom = null;
+    protected $found_charset = null;
     protected $extracted_content = false;
     protected $must_check = false;
     protected $str_schema = null;
@@ -201,6 +202,44 @@ class Microdata extends \DOMElement
         if(!$this->extracted_content)
         {
             $this->check();
+
+            foreach(array('meta', 'META', 'Meta') as $str_meta)
+            {
+                $metas = $this->dom->getElementsByTagName($str_meta);
+
+                foreach($metas as $m)
+                {
+                    foreach(array('charset', 'CHARSET', 'Charset') as $str_attr3)
+                    {
+                        if($m->hasAttribute($str_attr3))
+                        {
+                            $this->found_charset = trim($m->getAttribute($str_attr3));
+                        }
+                    }
+
+                    foreach(array('http-equiv', 'HTTP-EQUIV', 'Http-Equiv') as $str_attr)
+                    {
+                        if($m->hasAttribute($str_attr))
+                        {
+                            if(strtolower(trim($m->getAttribute($str_attr))) == 'content-type')
+                            {
+                                foreach(array('content', 'CONTENT', 'Content') as $str_attr2)
+                                {
+                                    if($m->hasAttribute($str_attr2))
+                                    {
+                                        $arr_matches = array();
+                                        preg_match('/charset=([a-z0-9-]+)/i', $m->getAttribute($str_attr2), $arr_matches);
+                                        $this->found_charset = $arr_matches[1];
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            //TODO Create method to convert content string if != utf-8
+            //var_dump($this->found_charset);
 
             $out = new \stdClass();
             $out->items = array();
