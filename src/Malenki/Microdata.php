@@ -167,6 +167,51 @@ class Microdata extends \DOMElement
 
 
     /**
+     * Get string into UTF-8 format.
+     *
+     * If the document has other given charset than UTF-8, then this method convert each string to UTF-8.
+     *
+     * If document's charset is unknown, then UTF-8 is chosen by default.
+     * 
+     * @param string $str Input string, to convert or no.
+     * @access public
+     * @return string Converted (or no) string.
+     */
+    public function getString($str)
+    {
+        if(!is_null($this->found_charset))
+        {
+            if(!preg_match('/utf[-]{0,1}8/i', $this->found_charset))
+            {
+                if(preg_match('/iso[-_]{0,1}8859[-_]{0,1}/i', $this->found_charset))
+                {
+                    return utf8_encode($str);
+                }
+                else
+                {
+                    if(extension_loaded('iconv'))
+                    {
+                        return iconv(strtoupper($this->found_charset), 'UTF-8//IGNORE', $str);
+                    }
+                    else
+                    {
+                        trigger_error('Iconv extension is not loaded on your system, resulted strings can be malformed!');
+                        return $str;
+                    }
+                }
+            }
+            else
+            {
+                return $str;
+            }
+        }
+
+        return $str;
+    }
+
+
+
+    /**
      * Enables checking feature. 
      * 
      * @param string $str_uri URI to fetch 
