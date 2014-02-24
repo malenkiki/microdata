@@ -3,23 +3,67 @@
         "This file locks the dependencies of your project to a known state",
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
     ],
-    "hash": "58a46b4c35e2392303b64ca8ff22f7c3",
+    "hash": "c4abad51c768117a689c550be9e98383",
     "packages": [
+        {
+            "name": "malenki/ansi",
+            "version": "1.2.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/malenkiki/ansi.git",
+                "reference": "d3709cc40511d7ef7bc8abfe518835b4163e6177"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/malenkiki/ansi/zipball/d3709cc40511d7ef7bc8abfe518835b4163e6177",
+                "reference": "d3709cc40511d7ef7bc8abfe518835b4163e6177",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Malenki": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Michel Petit",
+                    "email": "petit.michel@gmail.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Simple class to put some colors into your CLI PHP apps!",
+            "homepage": "https://github.com/malenkiki/ansi",
+            "keywords": [
+                "ansi",
+                "cli",
+                "colors"
+            ],
+            "time": "2014-01-21 22:59:16"
+        },
         {
             "name": "malenki/argile",
             "version": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://github.com/malenkiki/argile.git",
-                "reference": "4844ce341dffb1b5c5f6e4d3d9f3a239e74737a9"
+                "reference": "b576a0e4dacbeb076d891b1947689cf9c5f9ec6c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/malenkiki/argile/zipball/4844ce341dffb1b5c5f6e4d3d9f3a239e74737a9",
-                "reference": "4844ce341dffb1b5c5f6e4d3d9f3a239e74737a9",
+                "url": "https://api.github.com/repos/malenkiki/argile/zipball/b576a0e4dacbeb076d891b1947689cf9c5f9ec6c",
+                "reference": "b576a0e4dacbeb076d891b1947689cf9c5f9ec6c",
                 "shasum": ""
             },
             "require": {
+                "malenki/ansi": ">=1.2.3",
                 "malenki/bah": ">=0.9.1",
                 "php": ">=5.3.0"
             },
@@ -47,7 +91,7 @@
                 "cli",
                 "optget"
             ],
-            "time": "2014-02-18 17:17:20"
+            "time": "2014-02-21 12:55:42"
         },
         {
             "name": "malenki/bah",

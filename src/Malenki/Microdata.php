@@ -60,12 +60,66 @@ class Microdata extends \DOMElement
     const AS_URL = 1;
     const AS_STRING = 2;
 
+    /**
+     * DOM object. 
+     * 
+     * @var mixed
+     * @access protected
+     */
     protected $dom = null;
+
+
+    /**
+     * Found charset name.
+     * 
+     * @var string
+     * @access protected
+     */
+    protected $found_charset = null;
+
+    /**
+     * Content is extracted? 
+     * 
+     * @var boolean
+     * @access protected
+     */
     protected $extracted_content = false;
+
+
+    /**
+     * Do it must include checking information?
+     * 
+     * @var boolean
+     * @access protected
+     */
     protected $must_check = false;
+
+
+    /**
+     * URI for a JSON schema to use for checking. 
+     * 
+     * @var string
+     * @access protected
+     */
     protected $str_schema = null;
+
+    /**
+     * Schema object for checking document.
+     * 
+     * @var \stdClass
+     * @access protected
+     */
     protected $schema = null;
+
+
+    /**
+     * Array as key/value for some statistical data. 
+     * 
+     * @var array
+     * @access protected
+     */
     protected $arr_stats = array();
+
 
 
     /**
@@ -166,6 +220,51 @@ class Microdata extends \DOMElement
 
 
     /**
+     * Get string into UTF-8 format.
+     *
+     * If the document has other given charset than UTF-8, then this method convert each string to UTF-8.
+     *
+     * If document's charset is unknown, then UTF-8 is chosen by default.
+     * 
+     * @param string $str Input string, to convert or no.
+     * @access public
+     * @return string Converted (or no) string.
+     */
+    public function getString($str)
+    {
+        if(!is_null($this->found_charset))
+        {
+            if(!preg_match('/utf[-]{0,1}8/i', $this->found_charset))
+            {
+                if(preg_match('/iso[-_]{0,1}8859[-_]{0,1}/i', $this->found_charset))
+                {
+                    return utf8_encode($str);
+                }
+                else
+                {
+                    if(extension_loaded('iconv'))
+                    {
+                        return iconv(strtoupper($this->found_charset), 'UTF-8//IGNORE', $str);
+                    }
+                    else
+                    {
+                        trigger_error('Iconv extension is not loaded on your system, resulted strings can be malformed!');
+                        return $str;
+                    }
+                }
+            }
+            else
+            {
+                return $str;
+            }
+        }
+
+        return $str;
+    }
+
+
+
+    /**
      * Enables checking feature. 
      * 
      * @param string $str_uri URI to fetch 
@@ -201,6 +300,42 @@ class Microdata extends \DOMElement
         if(!$this->extracted_content)
         {
             $this->check();
+
+            foreach(array('meta', 'META', 'Meta') as $str_meta)
+            {
+                $metas = $this->dom->getElementsByTagName($str_meta);
+
+                foreach($metas as $m)
+                {
+                    foreach(array('charset', 'CHARSET', 'Charset') as $str_attr3)
+                    {
+                        if($m->hasAttribute($str_attr3))
+                        {
+                            $this->found_charset = trim($m->getAttribute($str_attr3));
+                        }
+                    }
+
+                    foreach(array('http-equiv', 'HTTP-EQUIV', 'Http-Equiv') as $str_attr)
+                    {
+                        if($m->hasAttribute($str_attr))
+                        {
+                            if(strtolower(trim($m->getAttribute($str_attr))) == 'content-type')
+                            {
+                                foreach(array('content', 'CONTENT', 'Content') as $str_attr2)
+                                {
+                                    if($m->hasAttribute($str_attr2))
+                                    {
+                                        $arr_matches = array();
+                                        preg_match('/charset=([a-z0-9-]+)/i', $m->getAttribute($str_attr2), $arr_matches);
+                                        $this->found_charset = $arr_matches[1];
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
 
             $out = new \stdClass();
             $out->items = array();
@@ -317,7 +452,7 @@ class Microdata extends \DOMElement
             }
             else
             {
-                $value = $elem->textContent;
+                $value = $this->getString($elem->textContent);
 
                 $p = $elem->prop();
 
@@ -335,7 +470,7 @@ class Microdata extends \DOMElement
                 
                 if($strTag == 'meta')
                 {
-                    $value = $elem->getAttribute('content');
+                    $value = $this->getString($elem->getAttribute('content'));
                 }
                 elseif(in_array($strTag, array('audio', 'embed', 'iframe', 'img', 'source', 'track', 'video')))
                 {
@@ -347,11 +482,11 @@ class Microdata extends \DOMElement
                 }
                 elseif($strTag == 'object')
                 {
-                    $value = $elem->getAttribute('data');
+                    $value = $this->getString($elem->getAttribute('data'));
                 }
                 elseif($strTag == 'data')
                 {
-                    $value = $elem->getAttribute('value');
+                    $value = $this->getString($elem->getAttribute('value'));
                 }
                 elseif($strTag == 'time')
                 {
