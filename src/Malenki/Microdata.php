@@ -283,8 +283,6 @@ class Microdata extends \DOMElement
                 }
             }
 
-            //TODO Create method to convert content string if != utf-8
-            //var_dump($this->found_charset);
 
             $out = new \stdClass();
             $out->items = array();
@@ -401,7 +399,7 @@ class Microdata extends \DOMElement
             }
             else
             {
-                $value = $elem->textContent;
+                $value = $this->getString($elem->textContent);
 
                 $p = $elem->prop();
 
@@ -419,7 +417,7 @@ class Microdata extends \DOMElement
                 
                 if($strTag == 'meta')
                 {
-                    $value = $elem->getAttribute('content');
+                    $value = $this->getString($elem->getAttribute('content'));
                 }
                 elseif(in_array($strTag, array('audio', 'embed', 'iframe', 'img', 'source', 'track', 'video')))
                 {
@@ -431,11 +429,11 @@ class Microdata extends \DOMElement
                 }
                 elseif($strTag == 'object')
                 {
-                    $value = $elem->getAttribute('data');
+                    $value = $this->getString($elem->getAttribute('data'));
                 }
                 elseif($strTag == 'data')
                 {
-                    $value = $elem->getAttribute('value');
+                    $value = $this->getString($elem->getAttribute('value'));
                 }
                 elseif($strTag == 'time')
                 {
