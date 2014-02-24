@@ -60,13 +60,66 @@ class Microdata extends \DOMElement
     const AS_URL = 1;
     const AS_STRING = 2;
 
+    /**
+     * DOM object. 
+     * 
+     * @var mixed
+     * @access protected
+     */
     protected $dom = null;
+
+
+    /**
+     * Found charset name.
+     * 
+     * @var string
+     * @access protected
+     */
     protected $found_charset = null;
+
+    /**
+     * Content is extracted? 
+     * 
+     * @var boolean
+     * @access protected
+     */
     protected $extracted_content = false;
+
+
+    /**
+     * Do it must include checking information?
+     * 
+     * @var boolean
+     * @access protected
+     */
     protected $must_check = false;
+
+
+    /**
+     * URI for a JSON schema to use for checking. 
+     * 
+     * @var string
+     * @access protected
+     */
     protected $str_schema = null;
+
+    /**
+     * Schema object for checking document.
+     * 
+     * @var \stdClass
+     * @access protected
+     */
     protected $schema = null;
+
+
+    /**
+     * Array as key/value for some statistical data. 
+     * 
+     * @var array
+     * @access protected
+     */
     protected $arr_stats = array();
+
 
 
     /**
