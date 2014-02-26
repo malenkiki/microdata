@@ -128,8 +128,61 @@ if($opt->has('json'))
 }
 else
 {
-    //TODO formating result
-    var_dump($md->extract());
+    $obj = $md->extract();
+
+    function rec($obj)
+    {
+
+        foreach($obj as $k => $v)
+        {
+            if(is_object($v))
+            {
+                print($k . PHP_EOL);
+                rec($v);
+            }
+            if(is_array($v))
+            {
+                if($k == 'errors')
+                {
+                    if(count($v))
+                    {
+                        $red = new \Malenki\Ansi();
+                        $red->red->value($k);
+                        print($red->underline->bold . PHP_EOL);
+                        foreach($v as $err)
+                        {
+                            print($red->value($err) . PHP_EOL);
+                        }
+                    }
+                }
+                else
+                {
+                    print($k . PHP_EOL);
+                    rec($v);
+                }
+
+            }
+            if(is_scalar($v))
+            {
+                if($k == 'hasError')
+                {
+                    continue;
+                }
+
+                if(is_bool($v))
+                {
+                    $v = $v ? 'True' : 'False';
+                    print("$k : $v" . PHP_EOL);
+                }
+                else
+                {
+                    print("$k : $v" . PHP_EOL);
+                }
+            }
+        }
+    }
+
+    rec($obj);
 }
 
 exit(0);
