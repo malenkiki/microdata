@@ -336,13 +336,14 @@ class Microdata extends \DOMElement
                 }
             }
 
-
-            $out = new \stdClass();
-            $out->items = array();
             $xpath = new \DOMXPath($this->dom);
             $colPath = $xpath->query('//*[@itemscope and not(ancestor::*[@itemscope])]');
+
+            $out = new \stdClass();
             $out->count = $colPath->length;
             $out->hasItems = (boolean) $colPath->length;
+            
+            $out->items = array();
 
             foreach($colPath as $item)
             {
@@ -374,7 +375,7 @@ class Microdata extends \DOMElement
     public function getItems($item, array $arr_history)
     {
         $out = new \stdClass();
-        $out->properties = array();
+        $out->type = null;
         $out->hasError = false;
         $out->errors = array();
 
@@ -435,6 +436,8 @@ class Microdata extends \DOMElement
         }
 
         $out->hasId = isset($out->id);
+
+        $out->properties = array();
 
         foreach ($item->properties() as $elem)
         {
