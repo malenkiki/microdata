@@ -136,7 +136,8 @@ else
         {
             if(is_object($v))
             {
-                print($k . PHP_EOL);
+                $k = new \Malenki\Ansi((string) $k);
+                print($k->cyan . PHP_EOL);
 
                 ob_start();rec($v, true);$out = ob_get_contents();ob_end_clean();
 
@@ -165,7 +166,8 @@ else
                 {
                     if($k != 'properties')
                     {
-                        print($k . PHP_EOL);
+                        $k = new \Malenki\Ansi((string) $k);
+                        print($k->cyan . PHP_EOL);
                     }
                     ob_start();rec($v, true);$out = ob_get_contents();ob_end_clean();
 
