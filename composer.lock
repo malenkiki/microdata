@@ -3,20 +3,20 @@
         "This file locks the dependencies of your project to a known state",
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
     ],
-    "hash": "c4abad51c768117a689c550be9e98383",
+    "hash": "e16a8b3304b49c308d32c5c590819a5f",
     "packages": [
         {
             "name": "malenki/ansi",
-            "version": "1.2.3",
+            "version": "1.2.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/malenkiki/ansi.git",
-                "reference": "d3709cc40511d7ef7bc8abfe518835b4163e6177"
+                "reference": "a4085ae246a4e592ee4a11138246f4761deb25f6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/malenkiki/ansi/zipball/d3709cc40511d7ef7bc8abfe518835b4163e6177",
-                "reference": "d3709cc40511d7ef7bc8abfe518835b4163e6177",
+                "url": "https://api.github.com/repos/malenkiki/ansi/zipball/a4085ae246a4e592ee4a11138246f4761deb25f6",
+                "reference": "a4085ae246a4e592ee4a11138246f4761deb25f6",
                 "shasum": ""
             },
             "require": {
@@ -46,11 +46,11 @@
                 "cli",
                 "colors"
             ],
-            "time": "2014-01-21 22:59:16"
+            "time": "2014-02-26 13:07:44"
         },
         {
             "name": "malenki/argile",
-            "version": "dev-master",
+            "version": "3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/malenkiki/argile.git",
@@ -144,9 +144,9 @@
 
     ],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "malenki/argile": 20
-    },
+    "stability-flags": [
+
+    ],
     "platform": {
         "php": ">=5.3.0",
         "ext-dom": "*"
