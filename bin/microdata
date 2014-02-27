@@ -132,13 +132,16 @@ else
 
     function rec($obj)
     {
-
         foreach($obj as $k => $v)
         {
             if(is_object($v))
             {
                 print($k . PHP_EOL);
-                rec($v);
+
+                ob_start();rec($v, true);$out = ob_get_contents();ob_end_clean();
+
+                $s = new \Malenki\Bah\S($out);
+                print($s->margin(2));
             }
             if(is_array($v))
             {
@@ -151,14 +154,24 @@ else
                         print($red->underline->bold . PHP_EOL);
                         foreach($v as $err)
                         {
-                            print($red->value($err) . PHP_EOL);
+                            ob_start();print($red->value($err) . PHP_EOL);$out = ob_get_contents();ob_end_clean();
+
+                            $s = new \Malenki\Bah\S($out);
+                            print($s->margin(2));
                         }
                     }
                 }
                 else
                 {
-                    print($k . PHP_EOL);
-                    rec($v);
+                    if($k != 'properties')
+                    {
+                        print($k . PHP_EOL);
+                    }
+                    ob_start();rec($v, true);$out = ob_get_contents();ob_end_clean();
+
+                    $s = new \Malenki\Bah\S($out);
+                    print($s->margin(2));
+                    print(PHP_EOL);
                 }
 
             }
@@ -168,15 +181,46 @@ else
                 {
                     continue;
                 }
+                
+                if($k == 'hasId')
+                {
+                    continue;
+                }
+                
+                $label = new \Malenki\Ansi((string) $k);
 
                 if(is_bool($v))
                 {
+                    $label->cyan;
                     $v = $v ? 'True' : 'False';
-                    print("$k : $v" . PHP_EOL);
+                    print("$label: $v" . PHP_EOL);
                 }
                 else
                 {
-                    print("$k : $v" . PHP_EOL);
+                    if($k == 'type')
+                    {
+                        $label->red;
+                        $typeUrl = new \Malenki\Ansi((string) $v);
+                        print($label.': '.$typeUrl->underline->yellow . PHP_EOL);
+                        continue;
+                    }
+                    else
+                    {
+                        $label->cyan;
+                    }
+                    $v = preg_replace('/[\s]+/', ' ', $v);
+
+                    if(mb_strlen("$k: $v") > 78)
+                    {
+                        $red = new \Malenki\Ansi('…');
+                        $red->red;
+                        $s = new \Malenki\Bah\S("$label: $v");
+                        print($s->sub(0, 78) . $red . PHP_EOL);
+                    }
+                    else
+                    {
+                        print("$label: $v" . PHP_EOL);
+                    }
                 }
             }
         }
