@@ -24,14 +24,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 namespace Malenki;
 
-
 /**
  * Parse HTML to get microdata elements.
  *
  * Can use either URL or document content:
  *
- *     $md = new Microdata($url); // Load content from URL 
- *     $md = new Microdata($url, Microdata::AS_URL); // Same as previous 
+ *     $md = new Microdata($url); // Load content from URL
+ *     $md = new Microdata($url, Microdata::AS_URL); // Same as previous
  *     $md = new Microdata($content, Microdata::AS_STRING); // Load from content
  *
  * You get microdata tree by calling `extract()` method:
@@ -43,7 +42,7 @@ namespace Malenki;
  *
  *     $md = new Microdata($url);
  *     echo $md; // JSON
- * 
+ *
  * You can get statistical data about amount of types found:
  *
  *     $md = new Microdata($url);
@@ -52,7 +51,7 @@ namespace Malenki;
  *
  * This work is greatly taken from the work of [Philip Jägenstedt](http://gitorious.org/microdatajs/microdatajs) and [Lin Clark](http://github.com/linclark/MicrodataPHP).
  *
- * @author Michel Petit <petit.michel@gmail.com> 
+ * @author Michel Petit <petit.michel@gmail.com>
  * @license MIT
  */
 class Microdata extends \DOMElement
@@ -61,43 +60,40 @@ class Microdata extends \DOMElement
     const AS_STRING = 2;
 
     /**
-     * DOM object. 
-     * 
+     * DOM object.
+     *
      * @var mixed
      * @access protected
      */
     protected $dom = null;
 
-
     /**
      * Found charset name.
-     * 
+     *
      * @var string
      * @access protected
      */
     protected $found_charset = null;
 
     /**
-     * Content is extracted? 
-     * 
+     * Content is extracted?
+     *
      * @var boolean
      * @access protected
      */
     protected $extracted_content = false;
 
-
     /**
      * Do it must include checking information?
-     * 
+     *
      * @var boolean
      * @access protected
      */
     protected $must_check = false;
 
-
     /**
-     * URI for a JSON schema to use for checking. 
-     * 
+     * URI for a JSON schema to use for checking.
+     *
      * @var string
      * @access protected
      */
@@ -105,91 +101,79 @@ class Microdata extends \DOMElement
 
     /**
      * Schema object for checking document.
-     * 
+     *
      * @var \stdClass
      * @access protected
      */
     protected $schema = null;
 
-
     /**
-     * Array as key/value for some statistical data. 
-     * 
+     * Array as key/value for some statistical data.
+     *
      * @var array
      * @access protected
      */
     protected $arr_stats = array();
 
-
-
     /**
      * Helper to split content into array or string if one element is returned.
-     * 
-     * @param string $str The string to split
-     * @param boolean $as_array If true, always returns array.
+     *
+     * @param  string  $str      The string to split
+     * @param  boolean $as_array If true, always returns array.
      * @static
      * @access protected
-     * @return mixed An array if get more than one elements else it is a string
+     * @return mixed   An array if get more than one elements else it is a string
      */
     protected static function split($str, $as_array = false)
     {
         $arr = preg_split('/[\s]+/', $str);
 
-        if($as_array)
-        {
+        if ($as_array) {
             return $arr;
         }
 
-        if(count($arr) == 1)
-        {
+        if (count($arr) == 1) {
             return $arr[0];
-        }
-        else
-        {
+        } else {
             return $arr;
         }
     }
 
-
     /**
-     * Gets reference schema. 
-     * 
+     * Gets reference schema.
+     *
      * This allows to get schema definition to test microdata with it.
      *
      * If no arg is given, then it will get content form <http://schema.rdfs.org/all.json>.
-     * If you give a file as arg, it must have the same structure as JSON found into previous link. 
-     * @param string $str If given, a local JSON file.
+     * If you give a file as arg, it must have the same structure as JSON found into previous link.
+     * @param  string $str If given, a local JSON file.
      * @static
      * @access public
      * @return object
      */
     public static function getSchema($str = null)
     {
-        if($str)
-        {
+        if ($str) {
             return json_decode(file_get_contents($str));
         }
 
         return json_decode(file_get_contents('http://schema.rdfs.org/all.json'));
     }
 
-
-
     /**
-     * Instanciate loading document as it is or getting it from URL. 
-     * 
+     * Instanciate loading document as it is or getting it from URL.
+     *
      * @throw \RuntimeException If DOM extension is not loaded.
      * @throw \InvalidArgumentException If URL or content is not a valid string.
      * @throw \InvalidArgumentException If given type does not exist.
-     * @param string $str Document's URL or document's content.
-     * @param integer $type One of the class constant to set the way of getting the document
+     * @param  string  $str  Document's URL or document's content.
+     * @param  integer $type One of the class constant to set the way of getting the document
      * @access public
      * @return void
      */
     public function __construct($str, $type = self::AS_URL)
     {
-        if(!extension_loaded('dom'))
-        {
+        if (!extension_loaded('dom')) {
             throw new \RuntimeException(__CLASS__.' cannot be used without DOM extension!');
         }
 
@@ -197,27 +181,20 @@ class Microdata extends \DOMElement
         $this->dom->registerNodeClass('DOMElement', '\Malenki\Microdata');
         $this->dom->preserveWhiteSpace = false;
 
-        if(!is_string($str))
-        {
+        if (!is_string($str)) {
             throw new \InvalidArgumentException('URL or content must be a valid string!');
         }
 
-        if(!in_array($type, array(self::AS_URL, self::AS_STRING)))
-        {
+        if (!in_array($type, array(self::AS_URL, self::AS_STRING))) {
             throw new \InvalidArgumentException('Bad type value!');
         }
 
-        if($type == self::AS_URL)
-        {
+        if ($type == self::AS_URL) {
             @$this->dom->loadHTMLFile($str);
-        }
-        else
-        {
+        } else {
             @$this->dom->loadHTML($str);
         }
     }
-
-
 
     /**
      * Get string into UTF-8 format.
@@ -225,36 +202,27 @@ class Microdata extends \DOMElement
      * If the document has other given charset than UTF-8, then this method convert each string to UTF-8.
      *
      * If document's charset is unknown, then UTF-8 is chosen by default.
-     * 
-     * @param string $str Input string, to convert or no.
+     *
+     * @param  string $str Input string, to convert or no.
      * @access public
      * @return string Converted (or no) string.
      */
     public function getString($str)
     {
-        if(!is_null($this->found_charset))
-        {
-            if(!preg_match('/utf[-]{0,1}8/i', $this->found_charset))
-            {
-                if(preg_match('/iso[-_]{0,1}8859[-_]{0,1}/i', $this->found_charset))
-                {
+        if (!is_null($this->found_charset)) {
+            if (!preg_match('/utf[-]{0,1}8/i', $this->found_charset)) {
+                if (preg_match('/iso[-_]{0,1}8859[-_]{0,1}/i', $this->found_charset)) {
                     return utf8_encode($str);
-                }
-                else
-                {
-                    if(extension_loaded('iconv'))
-                    {
+                } else {
+                    if (extension_loaded('iconv')) {
                         return iconv(strtoupper($this->found_charset), 'UTF-8//IGNORE', $str);
-                    }
-                    else
-                    {
+                    } else {
                         trigger_error('Iconv extension is not loaded on your system, resulted strings can be malformed!');
+
                         return $str;
                     }
                 }
-            }
-            else
-            {
+            } else {
                 return $str;
             }
         }
@@ -265,9 +233,9 @@ class Microdata extends \DOMElement
 
 
     /**
-     * Enables checking feature. 
-     * 
-     * @param string $str_uri URI to fetch 
+     * Enables checking feature.
+     *
+     * @param  string     $str_uri URI to fetch
      * @access public
      * @return \Microdata
      */
@@ -275,12 +243,9 @@ class Microdata extends \DOMElement
     {
         $this->must_check = true;
 
-        if($str_uri)
-        {
+        if ($str_uri) {
             $this->str_schema = $str_uri;
-        }
-        else
-        {
+        } else {
             $this->str_schema = 'http://schema.rdfs.org/all.json';
         }
 
@@ -291,40 +256,30 @@ class Microdata extends \DOMElement
 
     /**
      * Extracts microdata's tree
-     * 
+     *
      * @access public
      * @return \stdClass
      */
     public function extract()
     {
-        if(!$this->extracted_content)
-        {
+        if (!$this->extracted_content) {
             $this->check();
 
-            foreach(array('meta', 'META', 'Meta') as $str_meta)
-            {
+            foreach (array('meta', 'META', 'Meta') as $str_meta) {
                 $metas = $this->dom->getElementsByTagName($str_meta);
 
-                foreach($metas as $m)
-                {
-                    foreach(array('charset', 'CHARSET', 'Charset') as $str_attr3)
-                    {
-                        if($m->hasAttribute($str_attr3))
-                        {
+                foreach ($metas as $m) {
+                    foreach (array('charset', 'CHARSET', 'Charset') as $str_attr3) {
+                        if ($m->hasAttribute($str_attr3)) {
                             $this->found_charset = trim($m->getAttribute($str_attr3));
                         }
                     }
 
-                    foreach(array('http-equiv', 'HTTP-EQUIV', 'Http-Equiv') as $str_attr)
-                    {
-                        if($m->hasAttribute($str_attr))
-                        {
-                            if(strtolower(trim($m->getAttribute($str_attr))) == 'content-type')
-                            {
-                                foreach(array('content', 'CONTENT', 'Content') as $str_attr2)
-                                {
-                                    if($m->hasAttribute($str_attr2))
-                                    {
+                    foreach (array('http-equiv', 'HTTP-EQUIV', 'Http-Equiv') as $str_attr) {
+                        if ($m->hasAttribute($str_attr)) {
+                            if (strtolower(trim($m->getAttribute($str_attr))) == 'content-type') {
+                                foreach (array('content', 'CONTENT', 'Content') as $str_attr2) {
+                                    if ($m->hasAttribute($str_attr2)) {
                                         $arr_matches = array();
                                         preg_match('/charset=([a-z0-9-]+)/i', $m->getAttribute($str_attr2), $arr_matches);
                                         $this->found_charset = $arr_matches[1];
@@ -342,11 +297,10 @@ class Microdata extends \DOMElement
             $out = new \stdClass();
             $out->count = $colPath->length;
             $out->hasItems = (boolean) $colPath->length;
-            
+
             $out->items = array();
 
-            foreach($colPath as $item)
-            {
+            foreach ($colPath as $item) {
                 $out->items[] = $this->getItems($item, array());
             }
 
@@ -356,11 +310,9 @@ class Microdata extends \DOMElement
         return $this->extracted_content;
     }
 
-
-
     /**
-     * Tests whether current selected page has its microdata content extracted. 
-     * 
+     * Tests whether current selected page has its microdata content extracted.
+     *
      * @access public
      * @return boolean
      */
@@ -368,9 +320,6 @@ class Microdata extends \DOMElement
     {
         return is_object($this->extracted_content);
     }
-
-
-
 
     public function getItems($item, array $arr_history)
     {
@@ -384,54 +333,40 @@ class Microdata extends \DOMElement
         $strType = trim($item->getAttribute('itemtype'));
         $strId = trim($item->getAttribute('itemid'));
 
-        if (!empty($strType))
-        {
+        if (!empty($strType)) {
             $out->type = self::split($strType);
 
             // statistical data about types
-            if(!is_array($out->type))
-            {
+            if (!is_array($out->type)) {
                 $arr_loop = array($out->type);
-            }
-            else
-            {
+            } else {
                 $arr_loop = $out->type;
             }
 
             // statistical data + check
-            foreach($arr_loop as $t)
-            {
+            foreach ($arr_loop as $t) {
                 // stats
-                if(!array_key_exists($t, $this->arr_stats))
-                {
+                if (!array_key_exists($t, $this->arr_stats)) {
                     $this->arr_stats[$t] = 1;
-                }
-                else
-                {
+                } else {
                     $this->arr_stats[$t] += 1;
                 }
 
                 // check
-                if($this->schema)
-                {
+                if ($this->schema) {
                     $type = array_pop(explode('/', $t));
 
-                    if(!isset($this->schema->types->$type))
-                    {
+                    if (!isset($this->schema->types->$type)) {
                         $out->hasError = true;
                         $out->errors[] = $type .' schema does not exist!';;
-                    }
-                    else
-                    {
+                    } else {
                         $arrProvCheck[] = $type;
                     }
                 }
             }
         }
 
-
-        if (!empty($strId))
-        {
+        if (!empty($strId)) {
             $out->id = $strId;
         }
 
@@ -439,72 +374,50 @@ class Microdata extends \DOMElement
 
         $out->properties = array();
 
-        foreach ($item->properties() as $elem)
-        {
-            if ($elem->hasAttribute('itemscope'))
-            {
+        foreach ($item->properties() as $elem) {
+            if ($elem->hasAttribute('itemscope')) {
                 if (in_array($elem, $arr_history)) {
                     $value = 'ERROR'; //TODO handles that using other way!
-                }
-                else
-                {
+                } else {
                     $arr_history[] = $item;
                     $value = $this->getItems($elem, $arr_history);
                     array_pop($arr_history);
                 }
-            }
-            else
-            {
+            } else {
                 $value = $this->getString($elem->textContent);
 
                 $p = $elem->prop();
 
-                if (!count($p))
-                {
+                if (!count($p)) {
                     $value = null;
                 }
-                
-                if ($elem->hasAttribute('itemscope'))
-                {
+
+                if ($elem->hasAttribute('itemscope')) {
                     $value = $elem;
                 }
 
                 $strTag = strtolower($elem->tagName);
-                
-                if($strTag == 'meta')
-                {
+
+                if ($strTag == 'meta') {
                     $value = $this->getString($elem->getAttribute('content'));
-                }
-                elseif(in_array($strTag, array('audio', 'embed', 'iframe', 'img', 'source', 'track', 'video')))
-                {
+                } elseif (in_array($strTag, array('audio', 'embed', 'iframe', 'img', 'source', 'track', 'video'))) {
                     $value = $elem->getAttribute('src');
-                }
-                elseif(in_array($strTag, array('a', 'area', 'link')))
-                {
+                } elseif (in_array($strTag, array('a', 'area', 'link'))) {
                     $value = $elem->getAttribute('href');
-                }
-                elseif($strTag == 'object')
-                {
+                } elseif ($strTag == 'object') {
                     $value = $this->getString($elem->getAttribute('data'));
-                }
-                elseif($strTag == 'data')
-                {
+                } elseif ($strTag == 'data') {
                     $value = $this->getString($elem->getAttribute('value'));
-                }
-                elseif($strTag == 'time')
-                {
+                } elseif ($strTag == 'time') {
                     $value = $elem->getAttribute('datetime');
                 }
-                
+
             }
 
-            foreach ($elem->prop() as $prop)
-            {
-                if($this->schema)
-                {
-                    foreach($arrProvCheck as $typeItem)
-                    {
-                        
+            foreach ($elem->prop() as $prop) {
+                if ($this->schema) {
+                    foreach ($arrProvCheck as $typeItem) {
+
                         if(
                             !in_array($prop, $this->schema->types->$typeItem->properties)
                             &&
@@ -513,8 +426,7 @@ class Microdata extends \DOMElement
                         {
                             $strError = $prop . ' is not official property of ' . $typeItem . '!';
 
-                            if(!in_array($strError, $out->errors))
-                            {
+                            if (!in_array($strError, $out->errors)) {
                                 $out->errors[] = $strError;
                             }
 
@@ -524,37 +436,28 @@ class Microdata extends \DOMElement
                 }
 
                 // already set? So, it is multiple prop!
-                if(isset($out->properties[$prop]))
-                {
-                    if(!is_array($out->properties[$prop]))
-                    {
+                if (isset($out->properties[$prop])) {
+                    if (!is_array($out->properties[$prop])) {
                         $out->properties[$prop] = array($out->properties[$prop], $value);
-                    }
-                    else
-                    {
+                    } else {
                         $out->properties[$prop][] = $value;
                     }
-                }
-                else
-                {
+                } else {
                     $out->properties[$prop] = $value;
                 }
 
             }
         }
 
-
         return $out;
     }
-    
-
 
     /**
-     * hasType 
+     * hasType
      *
      * @todo implement it!
-     * 
-     * @param string $str Type short name or full URL
+     *
+     * @param  string  $str Type short name or full URL
      * @access public
      * @return boolean
      */
@@ -562,13 +465,12 @@ class Microdata extends \DOMElement
     {
     }
 
-
     /**
-     * getType 
+     * getType
      *
      * @todo implement it!
-     * 
-     * @param string $str Type short name or full URL
+     *
+     * @param  string $str Type short name or full URL
      * @access public
      * @return mixed
      */
@@ -576,35 +478,31 @@ class Microdata extends \DOMElement
     {
     }
 
-
     /**
      * Gets amount of given type.
      *
-     * If type was not found, returns 0. 
-     * 
-     * @param string $str Type full name
+     * If type was not found, returns 0.
+     *
+     * @param  string  $str Type full name
      * @access public
      * @return integer
      */
     public function getTypeCount($str)
     {
-        if(!array_key_exists($str, $this->arr_stats))
-        {
+        if (!array_key_exists($str, $this->arr_stats)) {
             return 0;
         }
 
-        if(!$this->isExtracted())
-        {
+        if (!$this->isExtracted()) {
             $this->extract();
         }
 
         return $this->arr_stats[$str];
     }
 
-
     /**
-     * Get amount of all types found into the document. 
-     * 
+     * Get amount of all types found into the document.
+     *
      * Returns values as an array. Keys are type's names, values are amounts.
      *
      * @access public
@@ -612,8 +510,7 @@ class Microdata extends \DOMElement
      */
     public function getAllTypeCount()
     {
-        if(!$this->isExtracted())
-        {
+        if (!$this->isExtracted()) {
             $this->extract();
         }
 
@@ -626,8 +523,7 @@ class Microdata extends \DOMElement
     {
         $strProp = trim($this->getAttribute('itemprop'));
 
-        if(strlen($strProp))
-        {
+        if (strlen($strProp)) {
             return self::split($strProp, true);
         }
 
@@ -640,31 +536,26 @@ class Microdata extends \DOMElement
     {
         $arr_out = array();
 
-        if ($this->hasAttribute('itemscope'))
-        {
+        if ($this->hasAttribute('itemscope')) {
             $xpath = new \DOMXPath($this->ownerDocument);
             $arr_to_traverse = array($this);
             $arr_ref = array();
-            
+
             $str_ref = trim($this->getAttribute('itemref'));
 
-            if(!empty($str_ref))
-            {
+            if (!empty($str_ref)) {
                 $arr_ref = self::split($str_ref);
             }
 
-            foreach ($arr_ref as $ref)
-            {
+            foreach ($arr_ref as $ref) {
                 $children = $xpath->query('//*[@id="'.$ref.'"]');
-            
-                foreach($children as $child)
-                {
+
+                foreach ($children as $child) {
                     $this->traverse($child, $arr_to_traverse, $arr_out, $this);
                 }
             }
 
-            while (count($arr_to_traverse))
-            {
+            while (count($arr_to_traverse)) {
                 $this->traverse($arr_to_traverse[0], $arr_to_traverse, $arr_out, $this);
             }
         }
@@ -676,26 +567,21 @@ class Microdata extends \DOMElement
 
     protected function traverse($node, &$arr_to_traverse, &$arr_prop, $root)
     {
-        foreach ($arr_to_traverse as $i => $elem)
-        {
-            if ($elem->isSameNode($node))
-            {
+        foreach ($arr_to_traverse as $i => $elem) {
+            if ($elem->isSameNode($node)) {
                 unset($arr_to_traverse[$i]);
             }
         }
 
 
-        if (!$root->isSameNode($node))
-        {
+        if (!$root->isSameNode($node)) {
             $names = $node->prop();
 
-            if (count($names))
-            {
+            if (count($names)) {
                 $arr_prop[] = $node;
             }
 
-            if ($node->hasAttribute('itemscope'))
-            {
+            if ($node->hasAttribute('itemscope')) {
                 return;
             }
         }
@@ -703,27 +589,21 @@ class Microdata extends \DOMElement
         $xpath = new \DOMXPath($this->ownerDocument);
         $children = $xpath->query($node->getNodePath() . '/*');
 
-        foreach ($children as $child)
-        {
+        foreach ($children as $child) {
             $this->traverse($child, $arr_to_traverse, $arr_prop, $root);
         }
     }
 
-
-
     protected function check()
     {
-        if($this->must_check)
-        {
+        if ($this->must_check) {
             $this->schema = self::getSchema($this->str_schema);
         }
     }
 
-
-
     /**
-     * In string context, returns JSON microdata tree. 
-     * 
+     * In string context, returns JSON microdata tree.
+     *
      * @access public
      * @return string
      */
