@@ -123,6 +123,8 @@ class Microdata extends \DOMElement
      * @static
      * @access protected
      * @return mixed   An array if get more than one elements else it is a string
+     * @todo   move to functional programming part
+     * @todo   have only one type of output
      */
     protected static function split($str, $as_array = false)
     {
@@ -150,6 +152,9 @@ class Microdata extends \DOMElement
      * @static
      * @access public
      * @return object
+     * 
+     * @todo move to functional part
+     * @todo outdated link to change
      */
     public static function getSchema($str = null)
     {
@@ -206,6 +211,8 @@ class Microdata extends \DOMElement
      * @param  string $str Input string, to convert or no.
      * @access public
      * @return string Converted (or no) string.
+     * 
+     * @todo great part of it must move to functional programming part
      */
     public function getString($str)
     {
